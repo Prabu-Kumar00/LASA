@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASA Medicine Dispensing Safety Console</title>
+    <style>
+        :root {
+            --bg-color: #0F172A;
+            --panel-bg: #1E293B;
+            --panel-border: #334155;
+            --text-main: #F8FAFC;
+            --text-muted: #94A3B8;
+            --color-ok: #10B981;
+            --color-ok-bg: #022C22;
+            --color-warn: #F59E0B;
+            --color-warn-bg: #451A03;
+            --color-block: #EF4444;
+            --color-block-bg: #450A0A;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+            --font-sans: 'Segoe UI', -apple-system, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-sans);
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--panel-border);
+            margin-bottom: 15px;
+            flex-shrink: 0;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            letter-spacing: 0.5px;
+        }
+        .header-title p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .mode-toggle {
+            display: flex;
+            gap: 10px;
+            background-color: var(--panel-bg);
+            padding: 5px;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .toggle-btn {
+            padding: 8px 16px;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            font-weight: 600;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .toggle-btn.active {
+            background-color: var(--panel-border);
+            color: var(--text-main);
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 320px 420px 1fr;
+            gap: 15px;
+            flex-grow: 1;
+            min-height: 0; /* allows grid children to scroll */
+        }
+
+        .panel {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 12px 15px;
+            background-color: rgba(255, 255, 255, 0.02);
+            border-bottom: 1px solid var(--panel-border);
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            padding: 15px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        /* RX QUEUE Panel */
+        .staff-selector {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .staff-selector label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .staff-selector select {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--panel-border);
+            padding: 8px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .rx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .rx-card {
+            border: 1px solid var(--panel-border);
+            border-radius: 6px;
+            padding: 12px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.01);
+            transition: border-color 0.2s;
+        }
+
+        .rx-card:hover {
+            border-color: #475569;
+        }
+
+        .rx-card.active {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .rx-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .rx-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .rx-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .rx-badge.cold {
+            background-color: #1e3a8a;
+            color: #93c5fd;
+        }
+
+        .rx-badge.room {
+            background-color: #334155;
+            color: #cbd5e1;
+        }
+
+        /* VERIFICATION Panel */
+        .verification-info {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .active-rx-display {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--panel-border);
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .active-rx-display h3 {
+            font-size: 1.1rem;
+            color: #3b82f6;
+        }
+        
+        .scanner-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-color: rgba(255, 255, 255, 0.01);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .scanner-controls p {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .scanner-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .scanner-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* Safety Intervention Screens */
+        .safety-screen {
+            border-radius: 6px;
+            border-width: 2px;
+            border-style: solid;
+            padding: 15px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .safety-screen.block {
+            display: block;
+            background-color: var(--color-block-bg);
+            border-color: var(--color-block);
+        }
+
+        .safety-screen.warn {
+            display: block;
+            background-color: var(--color-warn-bg);
+            border-color: var(--color-warn);
+        }
+
+        .safety-screen.ok {
+            display: block;
+            background-color: var(--color-ok-bg);
+            border-color: var(--color-ok);
+        }
+
+        .screen-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .metric-mono {
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            background-color: rgba(0,0,0,0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .reason-list {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            padding-left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .uncertainty-box {
+            background-color: #78350f;
+            border: 1px solid var(--color-warn);
+            color: #fef3c7;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        .override-controls {
+            margin-top: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .override-controls label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .override-controls textarea {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 1px solid var(--panel-border);
+            padding: 6px;
+            border-radius: 4px;
+            resize: none;
+            height: 50px;
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            flex-grow: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-block {
+            background-color: var(--color-block);
+            color: white;
+        }
+
+        .btn-warn-confirm {
+            background-color: var(--color-warn);
+            color: black;
+        }
+
+        .btn-cancel {
+            background-color: #475569;
+            color: white;
+        }
+
+        .btn-ok-dispense {
+            background-color: var(--color-ok);
+            color: white;
+        }
+
+        /* SHELF Panel */
+        .shelf-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* Baseline Mode Shelf (Plain List) */
+        .shelf-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .plain-med-row {
+            background-color: #1e293b;
+            border: 1px solid var(--panel-border);
+            border-radius: 4px;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 500;
+        }
+
+        .plain-med-row:hover {
+            border-color: #475569;
+            background-color: #334155;
+        }
+
+        .plain-med-row span {
+            font-family: var(--font-mono);
+        }
+
+        /* Prototype Mode Grid */
+        .shelf-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .med-card {
+            background-color: #0f172a;
+            border: 2px solid var(--panel-border);
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .med-card:hover {
+            border-color: #475569;
+            transform: translateY(-2px);
+        }
+
+        .med-card-img-wrapper {
+            position: relative;
+            background-color: #fff;
+            aspect-ratio: 4/3;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .med-card-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .med-card-details {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-grow: 1;
+        }
+
+        .med-card-name {
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        .med-card-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .med-card-badges {
+            display: flex;
+            gap: 6px;
+            margin-top: auto;
+        }
+
+        .badge-shelf {
+            background-color: #334155;
+            color: #cbd5e1;
+            font-size: 0.7rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-family: var(--font-mono);
+        }
+
+        .badge-cold {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            font-size: 0.7rem;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        /* AUDIT LOG Footer Panel */
+        footer {
+            height: 180px;
+            margin-top: 15px;
+            flex-shrink: 0;
+        }
+
+        .log-table-wrapper {
+            height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .log-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            text-align: left;
+        }
+
+        .log-table th {
+            padding: 8px 10px;
+            background-color: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid var(--panel-border);
+            color: var(--text-muted);
+        }
+
+        .log-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-family: var(--font-mono);
+        }
+
+        .log-row-error {
+            background-color: rgba(239, 68, 68, 0.05);
+            color: #fca5a5;
+        }
+
+        .log-row-ok {
+            background-color: rgba(16, 185, 129, 0.05);
+            color: #a7f3d0;
+        }
+
+        .log-row-override {
+            background-color: rgba(245, 158, 11, 0.05);
+            color: #fde047;
+        }
+
+        .banner-alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--color-block);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: none;
+            animation: fadeInOut 3s forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -20px); }
+            10% { opacity: 1; transform: translate(-50%, 0); }
+            90% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="banner-alert" id="baseline-alert">
+        WRONG ITEM DISPENSED — NO WARNING SHOWN
+    </div>
+
+    <header>
+        <div class="header-title">
+            <h1>Look-Alike Sound-Alike (LASA) Dispensing Safety Console</h1>
+            <p>Specialty Biologics Dispensing Unit | Cold-Chain Safeguard Console</p>
+        </div>
+        <div class="mode-toggle">
+            <button class="toggle-btn" id="btn-baseline" onclick="setMode('baseline')">Baseline Mode</button>
+            <button class="toggle-btn active" id="btn-prototype" onclick="setMode('prototype')">Prototype Mode</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        
+        <!-- COLUMN 1: RX QUEUE -->
+        <div class="panel">
+            <div class="panel-header">Prescription Queue</div>
+            <div class="panel-content">
+                <div class="staff-selector">
+                    <label for="current-staff">Active Operator Profile</label>
+                    <select id="current-staff">
+                        <option value="L-14">PharmTech L-14 (Low Experience Cohort)</option>
+                        <option value="L-05">PharmTech L-05 (Low Experience Cohort)</option>
+                        <option value="H-22" selected>Pharmacist H-22 (High Experience Cohort)</option>
+                        <option value="H-01">Pharmacist H-01 (High Experience Cohort)</option>
+                    </select>
+                </div>
+                <div class="rx-list" id="rx-list-container">
+                    <!-- Prescriptions will be populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 2: SAFETY GATE / VERIFICATION -->
+        <div class="panel">
+            <div class="panel-header">Safety Verification Layer</div>
+            <div class="panel-content">
+                <div class="verification-info" id="verification-panel">
+                    <div class="active-rx-display">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px;">ACTIVE PRESCRIPTION</p>
+                        <h3 id="active-rx-name">Select a prescription</h3>
+                        <p id="active-rx-detail" style="font-size: 0.85rem; font-family: var(--font-mono); margin-top: 4px;">--</p>
+                    </div>
+
+                    <div class="scanner-controls" id="scanner-controls-container">
+                        <p>BARCODE SCANNER STATE</p>
+                        <div class="scanner-options">
+                            <label class="scanner-option">
+                                <input type="radio" name="scanner-state" value="normal" checked>
+                                Normal (Returns scan mismatch on wrong SKU)
+                            </label>
+                            <label class="scanner-option">
+                                <input type="radio" name="scanner-state" value="offline">
+                                Offline / Smudged (No scan registered)
+                            </label>
+                            <label class="scanner-option">
+                                <input type="radio" name="scanner-state" value="false-confirm">
+                                False-Confirm (Incorrect pick scans as correct)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Safety Intervention Panel Container -->
+                    <div id="safety-panel-container">
+                        <div style="text-align: center; color: var(--text-muted); padding: 40px 0; font-size: 0.9rem;">
+                            Await pick. Select a container from the shelf grid on the right to simulate picking.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- COLUMN 3: VIRTUAL SHELF -->
+        <div class="panel">
+            <div class="panel-header">
+                <span id="shelf-title">Formulary Shelf Grid</span>
+                <span id="shelf-instruction" style="font-size: 0.8rem; color: var(--text-muted);">Double click cards to zoom labels</span>
+            </div>
+            <div class="panel-content" id="shelf-container-grid">
+                <!-- Shelf grid populated dynamically -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER: AUDIT LOG -->
+    <div class="panel" style="height: 200px; margin-top: 15px; flex-shrink: 0;">
+        <div class="panel-header">
+            <span>Safety Audit Log</span>
+            <button class="toggle-btn" style="padding: 2px 10px; font-size: 0.75rem;" onclick="clearAuditLog()">Clear Log</button>
+        </div>
+        <div class="log-table-wrapper">
+            <table class="log-table">
+                <thead>
+                    <tr>
+                        <th style="width: 140px;">Timestamp</th>
+                        <th style="width: 80px;">Staff ID</th>
+                        <th style="width: 120px;">Safety Mode</th>
+                        <th style="width: 100px;">Outcome</th>
+                        <th style="width: 250px;">Transaction Details (Intended &rarr; Picked)</th>
+                        <th>Override Reason / Safety Details</th>
+                    </tr>
+                </thead>
+                <tbody id="audit-log-body">
+                    <!-- Logs appended dynamically -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. DATA LAYER ---
+        const CATALOG = [
+            {
+                sku: "MED-AVEN-10",
+                name: "Avenzira",
+                strength: "10mg",
+                form: "Carton",
+                phonetic_key: "PK-AVEN",
+                visual_key: "VK-RECT-BLUE",
+                cold_chain: true,
+                shelf: "R1-A",
+                ndc_sim: "55555-101-10",
+                color: "#1E3A8A",
+                pack_shape: "rectangular carton"
+            },
+            {
+                sku: "MED-AVEN-50",
+                name: "Avenzyla",
+                strength: "50mg",
+                form: "Carton",
+                phonetic_key: "PK-AVEN",
+                visual_key: "VK-RECT-ORANGE",
+                cold_chain: true,
+                shelf: "R1-B",
+                ndc_sim: "55555-101-50",
+                color: "#EA580C",
+                pack_shape: "rectangular carton"
+            },
+            {
+                sku: "MED-BAVI-100",
+                name: "Bavinex",
+                strength: "100mg",
+                form: "Vial",
+                phonetic_key: "PK-BAVI",
+                visual_key: "VK-VIAL-RED",
+                cold_chain: true,
+                shelf: "R2-A",
+                ndc_sim: "55555-202-10",
+                color: "#DC2626",
+                pack_shape: "vial"
+            },
+            {
+                sku: "MED-KRY-200",
+                name: "Krysolis",
+                strength: "200mg",
+                form: "Vial",
+                phonetic_key: "PK-KRYS",
+                visual_key: "VK-VIAL-RED",
+                cold_chain: true,
+                shelf: "R2-B",
+                ndc_sim: "55555-303-20",
+                color: "#DC2626",
+                pack_shape: "vial"
+            },
+            {
+                sku: "MED-ZILO-50",
+                name: "Zilomed",
+                strength: "50mg",
+                form: "Blister",
+                phonetic_key: "PK-ZILO",
+                visual_key: "VK-BLIS-GREEN",
+                cold_chain: false,
+                shelf: "R3-A",
+                ndc_sim: "55555-404-50",
+                color: "#16A34A",
+                pack_shape: "blister"
+            },
+            {
+                sku: "MED-ZILO-100",
+                name: "Zilomax",
+                strength: "100mg",
+                form: "Blister",
+                phonetic_key: "PK-ZILO",
+                visual_key: "VK-BLIS-GREEN",
+                cold_chain: false,
+                shelf: "R3-A",
+                ndc_sim: "55555-404-99",
+                color: "#16A34A",
+                pack_shape: "blister"
+            },
+            {
+                sku: "MED-GLYC-05",
+                name: "Glycopen Mite",
+                strength: "5mg",
+                form: "Pen",
+                phonetic_key: "PK-GLYC",
+                visual_key: "VK-PEN-YELLOW",
+                cold_chain: true,
+                shelf: "R4-A",
+                ndc_sim: "55555-505-05",
+                color: "#EAB308",
+                pack_shape: "pen carton"
+            },
+            {
+                sku: "MED-GLYC-20",
+                name: "Glycopen Forte",
+                strength: "20mg",
+                form: "Pen",
+                phonetic_key: "PK-GLYC",
+                visual_key: "VK-PEN-YELLOW",
+                cold_chain: true,
+                shelf: "R4-B",
+                ndc_sim: "55555-505-20",
+                color: "#EAB308",
+                pack_shape: "pen carton"
+            },
+            {
+                sku: "MED-NEUR-300",
+                name: "Neurogard",
+                strength: "300mg",
+                form: "Carton",
+                phonetic_key: "PK-NEUR",
+                visual_key: "VK-RECT-PURPLE",
+                cold_chain: false,
+                shelf: "R5-A",
+                ndc_sim: "55555-606-30",
+                color: "#7C3AED",
+                pack_shape: "rectangular carton"
+            },
+            {
+                sku: "MED-CALC-500",
+                name: "Calcitone",
+                strength: "500mg",
+                form: "Blister",
+                phonetic_key: "PK-CALC",
+                visual_key: "VK-BLIS-GRAY",
+                cold_chain: false,
+                shelf: "R5-B",
+                ndc_sim: "55555-707-50",
+                color: "#4B5563",
+                pack_shape: "blister"
+            },
+            {
+                sku: "MED-VENT-100",
+                name: "Ventirex",
+                strength: "100mcg",
+                form: "Pen",
+                phonetic_key: "PK-VENT",
+                visual_key: "VK-PEN-TEAL",
+                cold_chain: false,
+                shelf: "R6-A",
+                ndc_sim: "55555-808-10",
+                color: "#0D9488",
+                pack_shape: "pen carton"
+            },
+            {
+                sku: "MED-FLUX-20",
+                name: "Fluxamine",
+                strength: "20mg",
+                form: "Carton",
+                phonetic_key: "PK-FLUX",
+                visual_key: "VK-RECT-PINK",
+                cold_chain: false,
+                shelf: "R6-B",
+                ndc_sim: "55555-909-20",
+                color: "#DB2777",
+                pack_shape: "rectangular carton"
+            }
+        ];
+
+        const CLINICAL_RX = [
+            { id: 1, sku: "MED-AVEN-10", patient: "Clara Oswald", details: "Prescribed Avenzira 10mg Carton (Cold Chain) - Sound-alike risk pair" },
+            { id: 2, sku: "MED-BAVI-100", patient: "John Watson", details: "Prescribed Bavinex 100mg Vial (Cold Chain) - Look-alike visual risk pair" },
+            { id: 3, sku: "MED-ZILO-50", patient: "Martha Jones", details: "Prescribed Zilomed 50mg Blister (Room Temp) - Sound/Look-alike double risk pair" },
+            { id: 4, sku: "MED-GLYC-05", patient: "Sarah Jane", details: "Prescribed Glycopen Mite 5mg Pen (Cold Chain) - Same-family different-strength pair" },
+            { id: 5, sku: "MED-NEUR-300", patient: "Rory Williams", details: "Prescribed Neurogard 300mg Carton (Room Temp) - Safe control check" },
+            { id: 6, sku: "MED-VENT-100", patient: "Amy Pond", details: "Prescribed Ventirex 100mcg Pen (Room Temp) - Offline scanning test case" }
+        ];
+
+        // --- 2. STATE MANAGER ---
+        let currentMode = 'prototype'; // 'baseline' or 'prototype'
+        let activeRx = null;
+        let selectedPickMed = null;
+        let lastDecisionResult = null;
+
+        // --- 3. PORTS OF LASA ENGINE LOGIC ---
+
+        function lcsLength(s1, s2) {
+            const m = s1.length;
+            const n = s2.length;
+            const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
+            for (let i = 1; i <= m; i++) {
+                for (let j = 1; j <= n; j++) {
+                    if (s1[i - 1] === s2[j - 1]) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+            return dp[m][n];
+        }
+
+        function phoneticSimilarity(nameA, nameB) {
+            if (!nameA || !nameB) return 0;
+            const s1 = nameA.trim().toLowerCase();
+            const s2 = nameB.trim().toLowerCase();
+            const lcs = lcsLength(s1, s2);
+            return (2.0 * lcs) / (s1.length + s2.length);
+        }
+
+        function visualSimilarity(medA, medB) {
+            const colorScore = (medA.color.trim().toLowerCase() === medB.color.trim().toLowerCase()) ? 1.0 : 0.0;
+            const shapeScore = (medA.pack_shape.trim().toLowerCase() === medB.pack_shape.trim().toLowerCase()) ? 1.0 : 0.0;
+            const keyScore = (medA.visual_key === medB.visual_key) ? 1.0 : 0.0;
+            return (0.5 * colorScore) + (0.3 * shapeScore) + (0.2 * keyScore);
+        }
+
+        function shelfProximity(medA, medB) {
+            if (!medA.shelf || !medB.shelf) return 0.0;
+            const sA = medA.shelf.trim();
+            const sB = medB.shelf.trim();
+            if (sA === sB) return 1.0;
+            const prefixA = sA.split('-')[0];
+            const prefixB = sB.split('-')[0];
+            if (prefixA === prefixB) return 0.5;
+            return 0.0;
+        }
+
+        function confusionRisk(medA, medB) {
+            let reasons = [];
+            let flags = [];
+            let confidence = 1.0;
+            
+            const nameA = medA.name ? medA.name.trim() : "";
+            const nameB = medB.name ? medB.name.trim() : "";
+            
+            let phonSim = 0.0;
+            if (!nameA || !nameB) {
+                flags.push("missing_name");
+                confidence = 0.4;
+                reasons.push("Data entry failure: One or both medicine names are missing.");
+            } else {
+                phonSim = phoneticSimilarity(nameA, nameB);
+            }
+            
+            const visSim = visualSimilarity(medA, medB);
+            const proxSim = shelfProximity(medA, medB);
+            
+            let baseScore = (0.45 * phonSim) + (0.35 * visSim) + (0.20 * proxSim);
+            let riskScore = baseScore;
+            
+            if (nameA && nameB) {
+                if (phonSim > 0.6) {
+                    reasons.push(`High phonetic name similarity: '${nameA}' and '${nameB}' (Score: ${phonSim.toFixed(2)})`);
+                } else if (phonSim > 0.3) {
+                    reasons.push(`Moderate name similarity: '${nameA}' and '${nameB}' (Score: ${phonSim.toFixed(2)})`);
+                }
+            }
+            
+            if (medA.color.trim().toLowerCase() === medB.color.trim().toLowerCase()) {
+                reasons.push(`Identical carton/vial color: ${medA.color}`);
+            }
+            if (medA.pack_shape.trim().toLowerCase() === medB.pack_shape.trim().toLowerCase()) {
+                reasons.push(`Same packaging shape: ${medA.pack_shape}`);
+            }
+            if (medA.visual_key === medB.visual_key) {
+                reasons.push(`Shared visual signature key: ${medA.visual_key}`);
+            }
+            
+            if (proxSim === 1.0) {
+                reasons.push(`Stored on the exact same shelf: ${medA.shelf}`);
+            } else if (proxSim === 0.5) {
+                reasons.push(`Stored in close proximity: same zone ${medA.shelf.split('-')[0]}`);
+            }
+            
+            if (nameA && nameB && phonSim > 0.6 && medA.strength !== medB.strength) {
+                riskScore += 0.15;
+                reasons.push(`DOSING RISK: Similar name but different strengths (${medA.strength} vs ${medB.strength}).`);
+            }
+            
+            riskScore = Math.min(riskScore, 1.0);
+            
+            return {
+                risk_score: parseFloat(riskScore.toFixed(4)),
+                reasons: reasons,
+                confidence: confidence,
+                data_quality_flags: flags
+            };
+        }
+
+        function checkPick(intendedSku, pickedSku, catalog, barcodeScanOk) {
+            let result = {
+                match: false,
+                warning: false,
+                block: false,
+                risk_score: 0.0,
+                confidence: 1.0,
+                reasons: [],
+                data_quality_flags: [],
+                uncertainty_message: null
+            };
+            
+            if (barcodeScanOk === false) {
+                result.block = true;
+                result.warning = true;
+                result.risk_score = 1.0;
+                result.reasons = ["Barcode scanner reported explicit mismatch. Stop dispensing immediately."];
+                return result;
+            }
+            
+            const catalogMap = {};
+            catalog.forEach(m => { catalogMap[m.sku] = m; });
+            
+            const intendedMed = catalogMap[intendedSku];
+            const pickedMed = catalogMap[pickedSku];
+            
+            if (!intendedMed || !pickedMed) {
+                result.warning = true;
+                result.data_quality_flags.push("unknown_sku");
+                result.confidence = 0.3;
+                result.risk_score = 0.5;
+                let missing = [];
+                if (!intendedMed) missing.push(intendedSku);
+                if (!pickedMed) missing.push(pickedSku);
+                result.reasons = [`Unknown SKU(s) encountered in dispensing transaction: ${missing.join(', ')}`];
+                result.uncertainty_message = "Unknown SKU: Picked item is not registered in the active system catalog. Please escalate to the pharmacist for manual verification.";
+                return result;
+            }
+            
+            if (barcodeScanOk === null || barcodeScanOk === undefined) {
+                result.confidence = 0.6;
+                result.uncertainty_message = "Barcode scan missing: Cold-chain barcode could not be read or was bypassed. Uncertainty notice for authorised staff. Verify carton labels manually before dispensing.";
+            }
+            
+            if (barcodeScanOk === true && intendedSku !== pickedSku) {
+                result.data_quality_flags.push("scanner_false_confirmation_suspected");
+            }
+            
+            if (intendedSku === pickedSku) {
+                result.match = true;
+                return result;
+            }
+            
+            result.match = false;
+            
+            const explanation = confusionRisk(intendedMed, pickedMed);
+            
+            result.risk_score = explanation.risk_score;
+            result.reasons = result.reasons.concat(explanation.reasons);
+            result.data_quality_flags = result.data_quality_flags.concat(explanation.data_quality_flags);
+            
+            if (barcodeScanOk === null || barcodeScanOk === undefined) {
+                result.confidence = Math.min(result.confidence, explanation.confidence);
+            } else {
+                result.confidence = explanation.confidence;
+            }
+            
+            if (result.confidence < 0.5) {
+                if (result.data_quality_flags.includes("missing_name")) {
+                    result.uncertainty_message = "Data quality alert: Missing drug metadata (blank name) prevents full safety checks. Pharmacist escalation required.";
+                } else {
+                    result.uncertainty_message = "Uncertainty notice: Data verification is compromised. Pharmacist escalation required.";
+                }
+            }
+            
+            if (result.risk_score >= 0.8) {
+                result.block = true;
+                result.warning = true;
+            } else if (result.risk_score >= 0.3) {
+                result.warning = true;
+            } else {
+                result.warning = true;
+                result.reasons.unshift("Item mismatch detected (intended SKU does not match picked SKU).");
+            }
+            
+            return result;
+        }
+
+        // --- 4. VIEW RENDERING ---
+
+        function init() {
+            renderRxQueue();
+            renderShelf();
+            setMode('prototype');
+            addAuditLog(new Date(), "SYSTEM", "NONE", "INFO", "System Initialized", "Dispensing Safety Interface online.");
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.getElementById('btn-baseline').classList.toggle('active', mode === 'baseline');
+            document.getElementById('btn-prototype').classList.toggle('active', mode === 'prototype');
+            
+            document.getElementById('scanner-controls-container').style.display = (mode === 'prototype') ? 'flex' : 'none';
+            document.getElementById('shelf-title').textContent = (mode === 'prototype') ? "Formulary Shelf Grid" : "Alphabetical Formulary List";
+            document.getElementById('shelf-instruction').style.display = (mode === 'prototype') ? 'inline' : 'none';
+
+            // Clear active verification states
+            selectedPickMed = null;
+            lastDecisionResult = null;
+            renderShelf();
+            renderInterventionPanel();
+        }
+
+        function renderRxQueue() {
+            const container = document.getElementById('rx-list-container');
+            container.innerHTML = '';
+            
+            CLINICAL_RX.forEach(rx => {
+                const med = CATALOG.find(m => m.sku === rx.sku);
+                const isCold = med ? med.cold_chain : false;
+                
+                const card = document.createElement('div');
+                card.className = `rx-card ${activeRx && activeRx.id === rx.id ? 'active' : ''}`;
+                card.onclick = () => selectRx(rx);
+                
+                card.innerHTML = `
+                    <div class="rx-title">
+                        <span>Rx #${rx.id}: ${rx.patient}</span>
+                        <span class="rx-badge ${isCold ? 'cold' : 'room'}">${isCold ? '2-8°C Cold' : 'Room Temp'}</span>
+                    </div>
+                    <div class="rx-desc">${rx.details}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectRx(rx) {
+            activeRx = rx;
+            selectedPickMed = null;
+            lastDecisionResult = null;
+            
+            renderRxQueue();
+            
+            const med = CATALOG.find(m => m.sku === rx.sku);
+            document.getElementById('active-rx-name').textContent = rx.patient;
+            document.getElementById('active-rx-detail').textContent = `Prescribed: ${med.name} ${med.strength} (${med.sku})`;
+            
+            renderInterventionPanel();
+        }
+
+        function renderShelf() {
+            const container = document.getElementById('shelf-container-grid');
+            container.innerHTML = '';
+            
+            if (currentMode === 'baseline') {
+                // Alphabetical Plain list
+                container.className = "shelf-list";
+                const sorted = [...CATALOG].sort((a, b) => a.name.localeCompare(b.name));
+                sorted.forEach(med => {
+                    const row = document.createElement('div');
+                    row.className = "plain-med-row";
+                    row.onclick = () => handlePick(med);
+                    row.innerHTML = `
+                        <span>${med.name} ${med.strength} (${med.form})</span>
+                        <span>[${med.sku}] Loc: ${med.shelf}</span>
+                    `;
+                    container.appendChild(row);
+                });
+            } else {
+                // Shelf visual grid
+                container.className = "shelf-grid";
+                CATALOG.forEach(med => {
+                    const card = document.createElement('div');
+                    card.className = "med-card";
+                    card.onclick = () => handlePick(med);
+                    
+                    // Procedural Packaging Image
+                    const imagePath = `static/packaging/${med.sku}.png`;
+                    
+                    card.innerHTML = `
+                        <div class="med-card-img-wrapper">
+                            <img class="med-card-img" src="${imagePath}" alt="${med.name} packaging mockup" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'300\' style=\'background:${encodeURIComponent(med.color)}\'><text x=\'50%\' y=\'50%\' dominant-baseline=\'middle\' text-anchor=\'middle\' fill=\'%23ffffff\' font-family=\'sans-serif\' font-size=\'20\'>${med.name} ${med.strength}</text></svg>'">
+                        </div>
+                        <div class="med-card-details">
+                            <div class="med-card-name">${med.name} ${med.strength}</div>
+                            <div class="med-card-sub">
+                                <span>${med.form}</span>
+                                <span>${med.sku}</span>
+                            </div>
+                            <div class="med-card-badges">
+                                <span class="badge-shelf">Loc: ${med.shelf}</span>
+                                ${med.cold_chain ? '<span class="badge-cold">❄ 2-8°C</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function getScannerState(intendedSku, pickedSku) {
+            const selector = document.querySelector('input[name="scanner-state"]:checked').value;
+            if (selector === 'offline') {
+                return null; // missing/offline
+            } else if (selector === 'false-confirm') {
+                return true; // reports true even if mismatch
+            } else {
+                // Normal scanner: true if matches, false if mismatch
+                return (intendedSku === pickedSku);
+            }
+        }
+
+        function handlePick(med) {
+            if (!activeRx) {
+                alert("Please select a prescription from the queue first.");
+                return;
+            }
+            
+            selectedPickMed = med;
+            
+            if (currentMode === 'baseline') {
+                // In Baseline, pick is dispensed immediately with no check
+                const isCorrect = (med.sku === activeRx.sku);
+                const staffId = document.getElementById('current-staff').value;
+                const timestamp = new Date();
+                
+                if (isCorrect) {
+                    addAuditLog(timestamp, staffId, "BASELINE", "DISPENSED", `${activeRx.sku} &rarr; ${med.sku}`, "Dispensed successfully.");
+                    alert(`Dispensed ${med.name} successfully.`);
+                } else {
+                    addAuditLog(timestamp, staffId, "BASELINE", "ERROR", `${activeRx.sku} &rarr; ${med.sku}`, "INCORRECT ITEM DISPENSED TO PATIENT.");
+                    showBaselineAlert();
+                }
+                resetVerificationPanel();
+            } else {
+                // Prototype verification logic
+                const scannerOk = getScannerState(activeRx.sku, med.sku);
+                lastDecisionResult = checkPick(activeRx.sku, med.sku, CATALOG, scannerOk);
+                renderInterventionPanel();
+            }
+        }
+
+        function showBaselineAlert() {
+            const alertBox = document.getElementById('baseline-alert');
+            alertBox.style.display = 'block';
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 3000);
+        }
+
+        function renderInterventionPanel() {
+            const container = document.getElementById('safety-panel-container');
+            container.innerHTML = '';
+            
+            if (!activeRx) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px 0;">Select a prescription from the queue.</div>`;
+                return;
+            }
+            
+            if (!selectedPickMed) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 40px 0;">Await pick. Select medicine from the shelf to scan.</div>`;
+                return;
+            }
+
+            const med = selectedPickMed;
+            const res = lastDecisionResult;
+            
+            if (res.block) {
+                // Red screen Block
+                container.innerHTML = `
+                    <div class="safety-screen block">
+                        <div class="screen-title">🚫 BLOCKED — DO NOT DISPENSE</div>
+                        <div class="metric-mono">Picked SKU: ${med.sku} | Intended: ${activeRx.sku}</div>
+                        <div class="metric-mono">Risk Score: ${res.risk_score.toFixed(4)} | Confidence: ${res.confidence.toFixed(1)}</div>
+                        <p style="font-size:0.85rem; font-weight:bold;">Interception Summary:</p>
+                        <ul class="reason-list">
+                            ${res.reasons.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                        ${res.uncertainty_message ? `<div class="uncertainty-box">${res.uncertainty_message}</div>` : ''}
+                        <div class="btn-group">
+                            <button class="btn btn-cancel" onclick="cancelTransaction('BLOCK')">Re-Pick Item</button>
+                        </div>
+                    </div>
+                `;
+            } else if (res.warning) {
+                // Amber screen Warning
+                container.innerHTML = `
+                    <div class="safety-screen warn">
+                        <div class="screen-title">⚠️ WARNING — VERIFY BEFORE DISPENSING</div>
+                        <div class="metric-mono">Picked SKU: ${med.sku} | Intended: ${activeRx.sku}</div>
+                        <div class="metric-mono">Risk Score: ${res.risk_score.toFixed(4)} | Confidence: ${res.confidence.toFixed(1)}</div>
+                        <p style="font-size:0.85rem; font-weight:bold;">Potential Confusion Reasons:</p>
+                        <ul class="reason-list">
+                            ${res.reasons.map(r => `<li>${r}</li>`).join('')}
+                        </ul>
+                        ${res.uncertainty_message ? `<div class="uncertainty-box">${res.uncertainty_message}</div>` : ''}
+                        
+                        <div class="override-controls">
+                            <label for="override-note">Reason for Manual Override (Mandatory)</label>
+                            <textarea id="override-note" placeholder="Enter clinical rationale or pharmacist approval initials..."></textarea>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button class="btn btn-warn-confirm" onclick="confirmOverride()">Manual Override & Dispense</button>
+                            <button class="btn btn-cancel" onclick="cancelTransaction('WARN')">Re-Pick Item</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // Green screen Cleared
+                container.innerHTML = `
+                    <div class="safety-screen ok">
+                        <div class="screen-title">✅ CLEARED FOR DISPENSING</div>
+                        <div class="metric-mono">Picked SKU: ${med.sku} (Matches Prescription)</div>
+                        <div class="metric-mono">Confidence: ${res.confidence.toFixed(1)}</div>
+                        <p style="font-size:0.85rem;">Barcode match verified. Packaging and shelf coordinates align correctly.</p>
+                        ${res.uncertainty_message ? `<div class="uncertainty-box">${res.uncertainty_message}</div>` : ''}
+                        <div class="btn-group">
+                            <button class="btn btn-ok-dispense" onclick="confirmDispense()">Dispense Item</button>
+                            <button class="btn btn-cancel" onclick="resetVerificationPanel()">Cancel</button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function confirmDispense() {
+            const staffId = document.getElementById('current-staff').value;
+            const timestamp = new Date();
+            addAuditLog(timestamp, staffId, "PROTOTYPE", "DISPENSED", `${activeRx.sku} &rarr; ${selectedPickMed.sku}`, "Correct SKU cleared and dispensed.");
+            alert(`Dispensed ${selectedPickMed.name} successfully.`);
+            resetVerificationPanel();
+        }
+
+        function confirmOverride() {
+            const noteField = document.getElementById('override-note');
+            const noteText = noteField.value.trim();
+            if (!noteText) {
+                alert("You must enter a clinical override reason to bypass this warning.");
+                return;
+            }
+            
+            const staffId = document.getElementById('current-staff').value;
+            const timestamp = new Date();
+            
+            // Check if uncertainty message exists (confidence < 0.5) to log escalation status
+            const outcome = "OVERRIDDEN";
+            const detailStr = `${activeRx.sku} &rarr; ${selectedPickMed.sku}`;
+            const logMsg = `OVERRIDE NOTE: "${noteText}" | Risk Score: ${lastDecisionResult.risk_score.toFixed(4)}`;
+            
+            addAuditLog(timestamp, staffId, "PROTOTYPE", outcome, detailStr, logMsg);
+            
+            const isCorrect = (selectedPickMed.sku === activeRx.sku);
+            if (isCorrect) {
+                alert(`Dispensed ${selectedPickMed.name} (Override Approved).`);
+            } else {
+                alert(`Dispensed INCORRECT item ${selectedPickMed.name} (Override Approved). This reaches the patient!`);
+            }
+            resetVerificationPanel();
+        }
+
+        function cancelTransaction(sourceState) {
+            const staffId = document.getElementById('current-staff').value;
+            const timestamp = new Date();
+            addAuditLog(timestamp, staffId, "PROTOTYPE", "CORRECTED", `${activeRx.sku} &rarr; ${selectedPickMed.sku}`, `Staff self-corrected from ${sourceState} screen. Re-pick in progress.`);
+            resetVerificationPanel();
+        }
+
+        function resetVerificationPanel() {
+            selectedPickMed = null;
+            lastDecisionResult = null;
+            renderInterventionPanel();
+        }
+
+        // --- 5. AUDIT LOGGER ---
+
+        function addAuditLog(timestamp, staffId, mode, outcome, transaction, notes) {
+            const tbody = document.getElementById('audit-log-body');
+            const row = document.createElement('tr');
+            
+            // Assign class based on outcome for color highlighting
+            if (outcome === 'ERROR') {
+                row.className = 'log-row-error';
+            } else if (outcome === 'DISPENSED') {
+                row.className = 'log-row-ok';
+            } else if (outcome === 'OVERRIDDEN') {
+                row.className = 'log-row-override';
+            }
+            
+            const timeStr = timestamp.toLocaleTimeString() + '.' + String(timestamp.getMilliseconds()).padStart(3, '0');
+            
+            row.innerHTML = `
+                <td>${timeStr}</td>
+                <td>${staffId}</td>
+                <td>${mode}</td>
+                <td style="font-weight:bold;">${outcome}</td>
+                <td>${transaction}</td>
+                <td>${notes}</td>
+            `;
+            
+            tbody.insertBefore(row, tbody.firstChild);
+        }
+
+        function clearAuditLog() {
+            if (confirm("Are you sure you want to clear the safety audit log?")) {
+                document.getElementById('audit-log-body').innerHTML = '';
+            }
+        }
+
+        // Load page
+        window.onload = init;
+    </script>
+</body>
+</html>

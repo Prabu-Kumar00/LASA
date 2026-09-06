@@ -1,0 +1,68 @@
+{
+    "overall": {
+        "total_rx": 4000,
+        "baseline_errors": 935,
+        "baseline_error_rate": 23.375,
+        "prototype_errors": 91,
+        "prototype_error_rate": 2.275,
+        "relative_reduction": 90.2674,
+        "blocks_count": 756,
+        "warnings_count": 246,
+        "self_corrections_count": 155,
+        "overrides_count": 91
+    },
+    "cohorts": {
+        "low_experience": {
+            "total": 2009,
+            "baseline_errors": 668,
+            "baseline_error_rate": 33.2504,
+            "prototype_errors": 66,
+            "prototype_error_rate": 3.2852,
+            "relative_reduction": 90.1198
+        },
+        "high_experience": {
+            "total": 1991,
+            "baseline_errors": 267,
+            "baseline_error_rate": 13.4103,
+            "prototype_errors": 25,
+            "prototype_error_rate": 1.2557,
+            "relative_reduction": 90.6367
+        },
+        "equity_gap_percentage_points": 0.5169,
+        "equity_flag": "CLEAR: NO BIAS CONCERN"
+    },
+    "stressors": {
+        "none": {
+            "total": 1040,
+            "baseline_errors": 162,
+            "baseline_error_rate": 15.5769,
+            "prototype_errors": 0,
+            "prototype_error_rate": 0.0,
+            "relative_reduction": 100.0
+        },
+        "interrupted": {
+            "total": 981,
+            "baseline_errors": 225,
+            "baseline_error_rate": 22.9358,
+            "prototype_errors": 2,
+            "prototype_error_rate": 0.2039,
+            "relative_reduction": 99.1111
+        },
+        "poor_lighting": {
+            "total": 1019,
+            "baseline_errors": 242,
+            "baseline_error_rate": 23.7488,
+            "prototype_errors": 4,
+            "prototype_error_rate": 0.3925,
+            "relative_reduction": 98.3471
+        },
+        "missing_label": {
+            "total": 960,
+            "baseline_errors": 306,
+            "baseline_error_rate": 31.875,
+            "prototype_errors": 85,
+            "prototype_error_rate": 8.8542,
+            "relative_reduction": 72.2222
+        }
+    }
+}
