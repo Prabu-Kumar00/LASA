@@ -182,7 +182,20 @@ CATALOG: List[Medicine] = [
         ndc_sim="55555-909-20",
         color="#DB2777",  # Pink
         pack_shape="rectangular carton"
-    )
+    ),
+    # 13-24. New SKUs to expand catalog
+    Medicine(sku="MED-OMEP-20", name="Omeprazol", strength="20mg", form="Bottle", phonetic_key="PK-OMEP", visual_key="VK-BOT-WHITE", cold_chain=False, shelf="R7-A", ndc_sim="55555-1010-20", color="#FFFFFF", pack_shape="bottle"),
+    Medicine(sku="MED-OMEP-40", name="Omepramax", strength="40mg", form="Bottle", phonetic_key="PK-OMEP", visual_key="VK-BOT-WHITE", cold_chain=False, shelf="R7-B", ndc_sim="55555-1010-40", color="#FFFFFF", pack_shape="bottle"),
+    Medicine(sku="MED-LISI-10", name="Lisinopril", strength="10mg", form="Blister", phonetic_key="PK-LISI", visual_key="VK-BLIS-YELLOW", cold_chain=False, shelf="R8-A", ndc_sim="55555-1111-10", color="#EAB308", pack_shape="blister"),
+    Medicine(sku="MED-LISI-20", name="Lisinopril", strength="20mg", form="Blister", phonetic_key="PK-LISI", visual_key="VK-BLIS-YELLOW", cold_chain=False, shelf="R8-A", ndc_sim="55555-1111-20", color="#EAB308", pack_shape="blister"),
+    Medicine(sku="MED-AMLO-5", name="Amlodipine", strength="5mg", form="Blister", phonetic_key="PK-AMLO", visual_key="VK-BLIS-BLUE", cold_chain=False, shelf="R9-A", ndc_sim="55555-1212-05", color="#1E3A8A", pack_shape="blister"),
+    Medicine(sku="MED-AMLO-10", name="Amlodipine", strength="10mg", form="Blister", phonetic_key="PK-AMLO", visual_key="VK-BLIS-BLUE", cold_chain=False, shelf="R9-B", ndc_sim="55555-1212-10", color="#1E3A8A", pack_shape="blister"),
+    Medicine(sku="MED-ATOR-20", name="Atorvastatin", strength="20mg", form="Bottle", phonetic_key="PK-ATOR", visual_key="VK-BOT-WHITE", cold_chain=False, shelf="R10-A", ndc_sim="55555-1313-20", color="#FFFFFF", pack_shape="bottle"),
+    Medicine(sku="MED-ATOR-40", name="Atorvastatin", strength="40mg", form="Bottle", phonetic_key="PK-ATOR", visual_key="VK-BOT-WHITE", cold_chain=False, shelf="R10-B", ndc_sim="55555-1313-40", color="#FFFFFF", pack_shape="bottle"),
+    Medicine(sku="MED-SIMV-20", name="Simvastatin", strength="20mg", form="Bottle", phonetic_key="PK-SIMV", visual_key="VK-BOT-WHITE", cold_chain=False, shelf="R10-C", ndc_sim="55555-1414-20", color="#FFFFFF", pack_shape="bottle"),
+    Medicine(sku="MED-SERO-50", name="Seroquel", strength="50mg", form="Carton", phonetic_key="PK-SERO", visual_key="VK-RECT-WHITE", cold_chain=False, shelf="R11-A", ndc_sim="55555-1515-50", color="#FFFFFF", pack_shape="rectangular carton"),
+    Medicine(sku="MED-SERO-100", name="Seroquel", strength="100mg", form="Carton", phonetic_key="PK-SERO", visual_key="VK-RECT-WHITE", cold_chain=False, shelf="R11-B", ndc_sim="55555-1515-10", color="#FFFFFF", pack_shape="rectangular carton"),
+    Medicine(sku="MED-CELE-200", name="Celebrex", strength="200mg", form="Carton", phonetic_key="PK-CELE", visual_key="VK-RECT-BLUE", cold_chain=False, shelf="R12-A", ndc_sim="55555-1616-20", color="#1E3A8A", pack_shape="rectangular carton")
 ]
 
 def get_lasa_pairs() -> List[Tuple[str, str]]:

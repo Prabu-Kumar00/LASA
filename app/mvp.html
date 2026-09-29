@@ -674,164 +674,7 @@
 
     <script>
         // --- 1. DATA LAYER ---
-        const CATALOG = [
-            {
-                sku: "MED-AVEN-10",
-                name: "Avenzira",
-                strength: "10mg",
-                form: "Carton",
-                phonetic_key: "PK-AVEN",
-                visual_key: "VK-RECT-BLUE",
-                cold_chain: true,
-                shelf: "R1-A",
-                ndc_sim: "55555-101-10",
-                color: "#1E3A8A",
-                pack_shape: "rectangular carton"
-            },
-            {
-                sku: "MED-AVEN-50",
-                name: "Avenzyla",
-                strength: "50mg",
-                form: "Carton",
-                phonetic_key: "PK-AVEN",
-                visual_key: "VK-RECT-ORANGE",
-                cold_chain: true,
-                shelf: "R1-B",
-                ndc_sim: "55555-101-50",
-                color: "#EA580C",
-                pack_shape: "rectangular carton"
-            },
-            {
-                sku: "MED-BAVI-100",
-                name: "Bavinex",
-                strength: "100mg",
-                form: "Vial",
-                phonetic_key: "PK-BAVI",
-                visual_key: "VK-VIAL-RED",
-                cold_chain: true,
-                shelf: "R2-A",
-                ndc_sim: "55555-202-10",
-                color: "#DC2626",
-                pack_shape: "vial"
-            },
-            {
-                sku: "MED-KRY-200",
-                name: "Krysolis",
-                strength: "200mg",
-                form: "Vial",
-                phonetic_key: "PK-KRYS",
-                visual_key: "VK-VIAL-RED",
-                cold_chain: true,
-                shelf: "R2-B",
-                ndc_sim: "55555-303-20",
-                color: "#DC2626",
-                pack_shape: "vial"
-            },
-            {
-                sku: "MED-ZILO-50",
-                name: "Zilomed",
-                strength: "50mg",
-                form: "Blister",
-                phonetic_key: "PK-ZILO",
-                visual_key: "VK-BLIS-GREEN",
-                cold_chain: false,
-                shelf: "R3-A",
-                ndc_sim: "55555-404-50",
-                color: "#16A34A",
-                pack_shape: "blister"
-            },
-            {
-                sku: "MED-ZILO-100",
-                name: "Zilomax",
-                strength: "100mg",
-                form: "Blister",
-                phonetic_key: "PK-ZILO",
-                visual_key: "VK-BLIS-GREEN",
-                cold_chain: false,
-                shelf: "R3-A",
-                ndc_sim: "55555-404-99",
-                color: "#16A34A",
-                pack_shape: "blister"
-            },
-            {
-                sku: "MED-GLYC-05",
-                name: "Glycopen Mite",
-                strength: "5mg",
-                form: "Pen",
-                phonetic_key: "PK-GLYC",
-                visual_key: "VK-PEN-YELLOW",
-                cold_chain: true,
-                shelf: "R4-A",
-                ndc_sim: "55555-505-05",
-                color: "#EAB308",
-                pack_shape: "pen carton"
-            },
-            {
-                sku: "MED-GLYC-20",
-                name: "Glycopen Forte",
-                strength: "20mg",
-                form: "Pen",
-                phonetic_key: "PK-GLYC",
-                visual_key: "VK-PEN-YELLOW",
-                cold_chain: true,
-                shelf: "R4-B",
-                ndc_sim: "55555-505-20",
-                color: "#EAB308",
-                pack_shape: "pen carton"
-            },
-            {
-                sku: "MED-NEUR-300",
-                name: "Neurogard",
-                strength: "300mg",
-                form: "Carton",
-                phonetic_key: "PK-NEUR",
-                visual_key: "VK-RECT-PURPLE",
-                cold_chain: false,
-                shelf: "R5-A",
-                ndc_sim: "55555-606-30",
-                color: "#7C3AED",
-                pack_shape: "rectangular carton"
-            },
-            {
-                sku: "MED-CALC-500",
-                name: "Calcitone",
-                strength: "500mg",
-                form: "Blister",
-                phonetic_key: "PK-CALC",
-                visual_key: "VK-BLIS-GRAY",
-                cold_chain: false,
-                shelf: "R5-B",
-                ndc_sim: "55555-707-50",
-                color: "#4B5563",
-                pack_shape: "blister"
-            },
-            {
-                sku: "MED-VENT-100",
-                name: "Ventirex",
-                strength: "100mcg",
-                form: "Pen",
-                phonetic_key: "PK-VENT",
-                visual_key: "VK-PEN-TEAL",
-                cold_chain: false,
-                shelf: "R6-A",
-                ndc_sim: "55555-808-10",
-                color: "#0D9488",
-                pack_shape: "pen carton"
-            },
-            {
-                sku: "MED-FLUX-20",
-                name: "Fluxamine",
-                strength: "20mg",
-                form: "Carton",
-                phonetic_key: "PK-FLUX",
-                visual_key: "VK-RECT-PINK",
-                cold_chain: false,
-                shelf: "R6-B",
-                ndc_sim: "55555-909-20",
-                color: "#DB2777",
-                pack_shape: "rectangular carton"
-            }
-        ];
+        let CATALOG = [];
 
         const CLINICAL_RX = [
             { id: 1, sku: "MED-AVEN-10", patient: "Clara Oswald", details: "Prescribed Avenzira 10mg Carton (Cold Chain) - Sound-alike risk pair" },
@@ -848,203 +691,28 @@
         let selectedPickMed = null;
         let lastDecisionResult = null;
 
-        // --- 3. PORTS OF LASA ENGINE LOGIC ---
-
-        function lcsLength(s1, s2) {
-            const m = s1.length;
-            const n = s2.length;
-            const dp = Array.from({ length: m + 1 }, () => Array(n + 1).fill(0));
-            for (let i = 1; i <= m; i++) {
-                for (let j = 1; j <= n; j++) {
-                    if (s1[i - 1] === s2[j - 1]) {
-                        dp[i][j] = dp[i - 1][j - 1] + 1;
-                    } else {
-                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
-                    }
-                }
-            }
-            return dp[m][n];
-        }
-
-        function phoneticSimilarity(nameA, nameB) {
-            if (!nameA || !nameB) return 0;
-            const s1 = nameA.trim().toLowerCase();
-            const s2 = nameB.trim().toLowerCase();
-            const lcs = lcsLength(s1, s2);
-            return (2.0 * lcs) / (s1.length + s2.length);
-        }
-
-        function visualSimilarity(medA, medB) {
-            const colorScore = (medA.color.trim().toLowerCase() === medB.color.trim().toLowerCase()) ? 1.0 : 0.0;
-            const shapeScore = (medA.pack_shape.trim().toLowerCase() === medB.pack_shape.trim().toLowerCase()) ? 1.0 : 0.0;
-            const keyScore = (medA.visual_key === medB.visual_key) ? 1.0 : 0.0;
-            return (0.5 * colorScore) + (0.3 * shapeScore) + (0.2 * keyScore);
-        }
-
-        function shelfProximity(medA, medB) {
-            if (!medA.shelf || !medB.shelf) return 0.0;
-            const sA = medA.shelf.trim();
-            const sB = medB.shelf.trim();
-            if (sA === sB) return 1.0;
-            const prefixA = sA.split('-')[0];
-            const prefixB = sB.split('-')[0];
-            if (prefixA === prefixB) return 0.5;
-            return 0.0;
-        }
-
-        function confusionRisk(medA, medB) {
-            let reasons = [];
-            let flags = [];
-            let confidence = 1.0;
-            
-            const nameA = medA.name ? medA.name.trim() : "";
-            const nameB = medB.name ? medB.name.trim() : "";
-            
-            let phonSim = 0.0;
-            if (!nameA || !nameB) {
-                flags.push("missing_name");
-                confidence = 0.4;
-                reasons.push("Data entry failure: One or both medicine names are missing.");
-            } else {
-                phonSim = phoneticSimilarity(nameA, nameB);
-            }
-            
-            const visSim = visualSimilarity(medA, medB);
-            const proxSim = shelfProximity(medA, medB);
-            
-            let baseScore = (0.45 * phonSim) + (0.35 * visSim) + (0.20 * proxSim);
-            let riskScore = baseScore;
-            
-            if (nameA && nameB) {
-                if (phonSim > 0.6) {
-                    reasons.push(`High phonetic name similarity: '${nameA}' and '${nameB}' (Score: ${phonSim.toFixed(2)})`);
-                } else if (phonSim > 0.3) {
-                    reasons.push(`Moderate name similarity: '${nameA}' and '${nameB}' (Score: ${phonSim.toFixed(2)})`);
-                }
-            }
-            
-            if (medA.color.trim().toLowerCase() === medB.color.trim().toLowerCase()) {
-                reasons.push(`Identical carton/vial color: ${medA.color}`);
-            }
-            if (medA.pack_shape.trim().toLowerCase() === medB.pack_shape.trim().toLowerCase()) {
-                reasons.push(`Same packaging shape: ${medA.pack_shape}`);
-            }
-            if (medA.visual_key === medB.visual_key) {
-                reasons.push(`Shared visual signature key: ${medA.visual_key}`);
-            }
-            
-            if (proxSim === 1.0) {
-                reasons.push(`Stored on the exact same shelf: ${medA.shelf}`);
-            } else if (proxSim === 0.5) {
-                reasons.push(`Stored in close proximity: same zone ${medA.shelf.split('-')[0]}`);
-            }
-            
-            if (nameA && nameB && phonSim > 0.6 && medA.strength !== medB.strength) {
-                riskScore += 0.15;
-                reasons.push(`DOSING RISK: Similar name but different strengths (${medA.strength} vs ${medB.strength}).`);
-            }
-            
-            riskScore = Math.min(riskScore, 1.0);
-            
-            return {
-                risk_score: parseFloat(riskScore.toFixed(4)),
-                reasons: reasons,
-                confidence: confidence,
-                data_quality_flags: flags
-            };
-        }
-
-        function checkPick(intendedSku, pickedSku, catalog, barcodeScanOk) {
-            let result = {
-                match: false,
-                warning: false,
-                block: false,
-                risk_score: 0.0,
-                confidence: 1.0,
-                reasons: [],
-                data_quality_flags: [],
-                uncertainty_message: null
-            };
-            
-            if (barcodeScanOk === false) {
-                result.block = true;
-                result.warning = true;
-                result.risk_score = 1.0;
-                result.reasons = ["Barcode scanner reported explicit mismatch. Stop dispensing immediately."];
-                return result;
-            }
-            
-            const catalogMap = {};
-            catalog.forEach(m => { catalogMap[m.sku] = m; });
-            
-            const intendedMed = catalogMap[intendedSku];
-            const pickedMed = catalogMap[pickedSku];
-            
-            if (!intendedMed || !pickedMed) {
-                result.warning = true;
-                result.data_quality_flags.push("unknown_sku");
-                result.confidence = 0.3;
-                result.risk_score = 0.5;
-                let missing = [];
-                if (!intendedMed) missing.push(intendedSku);
-                if (!pickedMed) missing.push(pickedSku);
-                result.reasons = [`Unknown SKU(s) encountered in dispensing transaction: ${missing.join(', ')}`];
-                result.uncertainty_message = "Unknown SKU: Picked item is not registered in the active system catalog. Please escalate to the pharmacist for manual verification.";
-                return result;
-            }
-            
-            if (barcodeScanOk === null || barcodeScanOk === undefined) {
-                result.confidence = 0.6;
-                result.uncertainty_message = "Barcode scan missing: Cold-chain barcode could not be read or was bypassed. Uncertainty notice for authorised staff. Verify carton labels manually before dispensing.";
-            }
-            
-            if (barcodeScanOk === true && intendedSku !== pickedSku) {
-                result.data_quality_flags.push("scanner_false_confirmation_suspected");
-            }
-            
-            if (intendedSku === pickedSku) {
-                result.match = true;
-                return result;
-            }
-            
-            result.match = false;
-            
-            const explanation = confusionRisk(intendedMed, pickedMed);
-            
-            result.risk_score = explanation.risk_score;
-            result.reasons = result.reasons.concat(explanation.reasons);
-            result.data_quality_flags = result.data_quality_flags.concat(explanation.data_quality_flags);
-            
-            if (barcodeScanOk === null || barcodeScanOk === undefined) {
-                result.confidence = Math.min(result.confidence, explanation.confidence);
-            } else {
-                result.confidence = explanation.confidence;
-            }
-            
-            if (result.confidence < 0.5) {
-                if (result.data_quality_flags.includes("missing_name")) {
-                    result.uncertainty_message = "Data quality alert: Missing drug metadata (blank name) prevents full safety checks. Pharmacist escalation required.";
-                } else {
-                    result.uncertainty_message = "Uncertainty notice: Data verification is compromised. Pharmacist escalation required.";
-                }
-            }
-            
-            if (result.risk_score >= 0.8) {
-                result.block = true;
-                result.warning = true;
-            } else if (result.risk_score >= 0.3) {
-                result.warning = true;
-            } else {
-                result.warning = true;
-                result.reasons.unshift("Item mismatch detected (intended SKU does not match picked SKU).");
-            }
-            
-            return result;
+        async function checkPickAsync(intendedSku, pickedSku, barcodeScanOk) {
+            const response = await fetch('/check_pick', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    intended_sku: intendedSku,
+                    picked_sku: pickedSku,
+                    barcode_scan_ok: barcodeScanOk
+                })
+            });
+            return await response.json();
         }
 
         // --- 4. VIEW RENDERING ---
 
-        function init() {
+        async function init() {
+            try {
+                const response = await fetch('/catalog');
+                CATALOG = await response.json();
+            } catch (err) {
+                console.error("Failed to load catalog from API", err);
+            }
             renderRxQueue();
             renderShelf();
             setMode('prototype');
@@ -1166,7 +834,7 @@
             }
         }
 
-        function handlePick(med) {
+        async function handlePick(med) {
             if (!activeRx) {
                 alert("Please select a prescription from the queue first.");
                 return;
@@ -1191,7 +859,7 @@
             } else {
                 // Prototype verification logic
                 const scannerOk = getScannerState(activeRx.sku, med.sku);
-                lastDecisionResult = checkPick(activeRx.sku, med.sku, CATALOG, scannerOk);
+                lastDecisionResult = await checkPickAsync(activeRx.sku, med.sku, scannerOk);
                 renderInterventionPanel();
             }
         }

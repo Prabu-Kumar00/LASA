@@ -9,6 +9,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from data.medicine_catalog import CATALOG, Medicine, get_lasa_pairs
 from app.lasa_engine import check_pick
 
+from dataclasses import dataclass
+
+@dataclass
+class OperatorCohort:
+    id: str
+    cohort_name: str
+    experience_level: str
+    fatigue_status: str
+    base_slip: float
+
 def run_simulation(
     n_prescriptions: int = 4000, 
     seed: int = 2026
@@ -19,21 +29,25 @@ def run_simulation(
     """
     random.seed(seed)
     
-    # 1. Setup staff cohorts
-    # 40 low experience (L-01 to L-40), base slip prob = 0.18
-    # 40 high experience (H-01 to H-40), base slip prob = 0.07
-    staff_pool = []
+    # 1. Setup staff cohorts using concrete schemas
+    # 40 low experience / sleep-deprived (L-01 to L-40), base slip prob = 0.18
+    # 40 high experience / rested (H-01 to H-40), base slip prob = 0.07
+    staff_pool: List[OperatorCohort] = []
     for i in range(1, 41):
-        staff_pool.append({
-            "id": f"L-{i:02d}",
-            "cohort": "low_experience",
-            "base_slip": 0.18
-        })
-        staff_pool.append({
-            "id": f"H-{i:02d}",
-            "cohort": "high_experience",
-            "base_slip": 0.07
-        })
+        staff_pool.append(OperatorCohort(
+            id=f"L-{i:02d}",
+            cohort_name="low_experience",
+            experience_level="novice",
+            fatigue_status="sleep_deprived",
+            base_slip=0.18
+        ))
+        staff_pool.append(OperatorCohort(
+            id=f"H-{i:02d}",
+            cohort_name="high_experience",
+            experience_level="expert",
+            fatigue_status="rested",
+            base_slip=0.07
+        ))
         
     # Stressors definition
     stressors = ["none", "interrupted", "poor_lighting", "missing_label"]
@@ -80,7 +94,7 @@ def run_simulation(
             barcode_scan_ok_default = None  # scanner offline/label missing
             
         # Calculate total experience-based slip probability
-        slip_prob = staff["base_slip"] * slip_mult
+        slip_prob = staff.base_slip * slip_mult
         
         picked_sku = intended_sku
         slip_type = "none"
@@ -131,8 +145,10 @@ def run_simulation(
             "rx_id": rx_id,
             "intended_sku": intended_sku,
             "picked_sku": picked_sku,
-            "staff_id": staff["id"],
-            "cohort": staff["cohort"],
+            "staff_id": staff.id,
+            "cohort": staff.cohort_name,
+            "experience_level": staff.experience_level,
+            "fatigue_status": staff.fatigue_status,
             "stressor": stressor,
             "slip_type": slip_type,
             "barcode_scan_ok": barcode_scan_ok,
