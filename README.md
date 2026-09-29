@@ -29,6 +29,7 @@ lasa-safety/
 │   └── user_guide.md             # Staff manual for operating the console
 ├── reports/
 │   ├── experiment_results.json   # Output data from the simulation run
+│   ├── report_2.md               # Phase 2 70% completion report
 │   └── final_report.md           # Main validation report
 ├── requirements.txt              # Project dependencies
 └── README.md                     # Setup and usage instructions
@@ -67,18 +68,51 @@ python app/experiment.py
 ```
 *Output: Generates quantitative evaluation tables in the console and saves raw data to `reports/experiment_results.json`.*
 
-### 5. Launch the Dispensing Console
-Open the standalone clinical console in any modern web browser:
+### 5. Launch the Dispensing Console API
+Start the FastAPI REST backend which serves the interactive HTML interface:
+```bash
+python app/api.py
+```
+Then open the standalone clinical console in any modern web browser:
 ```bash
 # Windows
-start app/mvp.html
+start http://localhost:8000
 
 # Mac
-open app/mvp.html
+open http://localhost:8000
 
 # Linux
-xdg-open app/mvp.html
+xdg-open http://localhost:8000
 ```
+
+---
+
+## Technical Documentation
+
+### API Endpoints
+The dispensing console communicates with the engine via a FastAPI backend:
+*   `GET /catalog`: Retrieves the complete structured JSON array of all SKUs in the formulary. Used by the frontend to construct the visual shelf grid.
+*   `POST /check_pick`: Core decision engine endpoint.
+    *   **Payload**: `{ "intended_sku": "str", "picked_sku": "str", "barcode_scan_ok": bool | null }`
+    *   **Response**: Returns a comprehensive JSON `RiskExplanation` object outlining `match`, `warning`, `block`, `risk_score`, `confidence`, `reasons`, and any `data_quality_flags`.
+
+### Database Schema
+The system models inventory and operators using formal Python `dataclasses`:
+
+**Medicine Schema (`Medicine`)**
+*   `sku` (str): Unique identifier.
+*   `name`, `strength`, `form` (str): Clinical characteristics.
+*   `phonetic_key`, `visual_key` (str): Categorical grouping properties for similarity scoring.
+*   `cold_chain` (bool): Environmental constraint flag.
+*   `shelf` (str): Location coordinate (e.g. `R1-A`).
+*   `color`, `pack_shape` (str): Physical attributes.
+
+**Operator Cohort Schema (`OperatorCohort`)**
+*   `id` (str): Staff identifier (e.g., `L-14`).
+*   `cohort_name` (str): `low_experience` or `high_experience`.
+*   `experience_level` (str): `novice` or `expert`.
+*   `fatigue_status` (str): `sleep_deprived` or `rested`.
+*   `base_slip` (float): Baseline cognitive slip probability.
 
 ---
 
