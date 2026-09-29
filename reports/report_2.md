@@ -83,9 +83,9 @@ To ensure the deterministic reliability of the newly decoupled engine, robust er
 
 ---
 
-## 6. Next Steps Towards 100% Completion (Phase 3 Roadmap)
+## 6. The Remaining 30% of the Project (Phase 3 Roadmap)
 
-With the core architecture, testing schemas, and algorithmic scalability validated, Phase 3 will focus on deployment readiness and data visualization to reach 100% completion:
+With the core architecture (70% milestone), testing schemas, and algorithmic scalability validated, the remaining 30% of the project will focus on deployment readiness, data visualization, and final clinical validation to reach 100% completion. The specific milestones for this remaining 30% are:
 
 1. **Dockerization & CI/CD Pipeline**: Containerize the FastAPI backend and HTML frontend into a unified Docker image to ensure seamless, environment-agnostic deployment across varied pharmacy IT infrastructures.
 2. **Advanced Analytics Dashboard**: Develop a secondary UI view to visualize the data generated in the `audit-log`. This dashboard will provide pharmacy managers with actionable heatmaps and charts detailing near-miss trends and peak error hours.
